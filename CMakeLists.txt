@@ -18,6 +18,9 @@ find_package(SDL2_image  CONFIG REQUIRED)
 find_package(SDL2_ttf    CONFIG REQUIRED)
 find_package(SDL2_mixer  CONFIG REQUIRED)
 
+set(SDL_DLL_DIR "${CMAKE_SOURCE_DIR}/DLL/x64")
+file(GLOB SDL_DLLS "${SDL_DLL_DIR}/*.dll")
+
 # -------------------- GLM --------------------
 add_subdirectory("${LIBRARY_DIR}/glm" EXCLUDE_FROM_ALL)
 set(HAVE_GLM_TARGET OFF)
@@ -61,6 +64,12 @@ file(GLOB_RECURSE PROJECT_SOURCE
 	"Source/*.cpp" 
 	"Source/*.h")
 add_executable(2d-game-engine-with-ecs ${PROJECT_SOURCE})
+
+add_custom_command(TARGET 2d-game-engine-with-ecs POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${SDL_DLLS}
+        $<TARGET_FILE_DIR:2d-game-engine-with-ecs>
+)
 
 target_link_libraries(2d-game-engine-with-ecs PRIVATE
   SDL2::SDL2

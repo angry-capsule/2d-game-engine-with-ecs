@@ -3,6 +3,7 @@
 
 #include "SDL.h"
 #include "../ECS/ECS.h"
+#include "../AssetStore/AssetStore.h"
 
 const int FPS = 144;
 const int MILLISECONDS_PER_FRAME = 1000 / FPS;
@@ -17,6 +18,7 @@ private:
 	SDL_Renderer* renderer;
 
 	std::unique_ptr<Registry> registry;
+	std::unique_ptr<AssetStore> assetStore;
 
 public:
 	int windowWidth;
@@ -26,6 +28,7 @@ public:
 	~Game();
 
 	void Initialize();
+	void LoadLevel(int level);
 	void Setup();
 	void Run();
 	void ProcessInput();
