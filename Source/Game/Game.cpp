@@ -24,8 +24,6 @@
 #include "../Components/SpriteComponent.h"
 #include "../Components/AnimationComponent.h"
 
-static std::string GetAssetPath(const std::string& rel);
-
 Game::Game() : isRunning(false), millisecondsPreviousFrame(0)
 {
 	registry = std::make_unique<Registry>();
@@ -190,34 +188,6 @@ void Game::Update()
 	registry->GetSystem<MovementSystem>().Update(deltaTime);
 	registry->GetSystem<AnimationSystem>().Update();
 }
-
-//void Game::Render()
-//{
-//	SDL_SetRenderDrawColor(renderer, 21, 21, 21, 255);
-//	SDL_RenderClear(renderer);
-//
-//	// const std::string assetPath = GetAssetPath("Assets/Images/tank-tiger-right.png");
-//
-//	/*
-//	SDL_Surface* surface = IMG_Load(assetPath.c_str());
-//	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-//	SDL_FreeSurface(surface);
-//
-//	SDL_Rect dstRect = { 
-//		10, 
-//		20, 
-//		32, 
-//		32 };
-//
-//	SDL_RenderCopy(renderer, texture, NULL, &dstRect);
-//
-//	SDL_DestroyTexture(texture);
-//	*/
-//
-//	registry->GetSystem<RenderSystem>().Update(renderer);
-//
-//	SDL_RenderPresent(renderer);
-//}
 
 void Game::Render()
 {
