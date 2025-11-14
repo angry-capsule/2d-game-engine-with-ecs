@@ -8,6 +8,7 @@
 #include <typeindex>
 #include <set>
 #include <memory>
+#include <deque>
 
 #include "../Logger/Logger.h"
 
@@ -42,21 +43,21 @@ public:
 	Entity(int id) : id(id) { };
 	Entity(const Entity& entity) = default;
 
+	void Kill();
 	int GetId() const;
 
 	Registry* registry;
 
 	template <typename TComponent, typename ...TArgs> void AddComponent(TArgs&& ...args);
 	template <typename TComponent> void RemoveComponent();
-	template <typename TComponent> bool HasComponent() const;
+	template <typename TComponent> bool	HasComponent() const;
 	template <typename TComponent> TComponent& GetComponent() const;
 
-	Entity& operator =(const Entity& entity) = default;
-
-	bool operator ==(const Entity& other) const  { return id == other.id; }
-	bool operator !=(const Entity& other) const  { return id != other.id; }
-	bool operator > (const Entity& other)  const { return id >  other.id; }
-	bool operator < (const Entity& other)  const { return id <  other.id; }
+	Entity& operator = (const Entity& entity) = default;
+	bool	operator ==(const Entity& other ) const  { return id == other.id; }
+	bool	operator !=(const Entity& other ) const  { return id != other.id; }
+	bool	operator > (const Entity& other ) const  { return id >  other.id; }
+	bool	operator < (const Entity& other ) const  { return id <  other.id; }
 };
 
 class System
@@ -150,12 +151,15 @@ private:
 	std::set<Entity> entitiesToBeAdded;
 	std::set<Entity> entitiesToBeKilled;
 
+	std::deque<int> freeIds;
+
 public:
 	Registry() = default;
 
 	void Update();
 
 	Entity CreateEntity();
+	void KillEntity(Entity entity);
 
 	template <typename TComponent, typename ...TArgs> void AddComponent(Entity entity, TArgs&& ...args);
 	template <typename TComponent> void RemoveComponent(Entity entity);
@@ -168,6 +172,7 @@ public:
 	template <typename TSystem> TSystem& GetSystem() const;
 
 	void AddEntityToSystems(Entity entity);
+	void RemoveEntityFromSystems(Entity entity);
 };
 
 template <typename TComponent>
