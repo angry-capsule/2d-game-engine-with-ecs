@@ -18,13 +18,15 @@
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
+#include "../Systems/CollisionSystem.h"
+#include "../Systems/RenderColliderSystem.h"
 
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidbodyComponent.h"
 #include "../Components/SpriteComponent.h"
 #include "../Components/AnimationComponent.h"
 
-Game::Game() : isRunning(false), millisecondsPreviousFrame(0)
+Game::Game() : isRunning(false), isDebug(false), millisecondsPreviousFrame(0)
 {
 	registry = std::make_unique<Registry>();
 	assetStore = std::make_unique<AssetStore>();
@@ -104,6 +106,10 @@ void Game::ProcessInput()
 			{
 				isRunning = false;
 			}
+			if (sdlEvent.key.keysym.sym == SDLK_d)
+			{
+				isDebug = !isDebug;
+			}
 			break;
 		}
 	}
@@ -114,6 +120,8 @@ void Game::LoadLevel(int level)
 	registry->AddSystem<MovementSystem>();
 	registry->AddSystem<RenderSystem>();
 	registry->AddSystem<AnimationSystem>();
+	registry->AddSystem<CollisionSystem>();
+	registry->AddSystem<RenderColliderSystem>();
 
 	assetStore->AddTexture(renderer, "tank-image", "Assets/Images/tank-panther-right.png");
 	assetStore->AddTexture(renderer, "truck-image", "Assets/Images/truck-ford-right.png");
@@ -189,6 +197,7 @@ void Game::Update()
 
 	registry->GetSystem<MovementSystem>().Update(deltaTime);
 	registry->GetSystem<AnimationSystem>().Update();
+	registry->GetSystem<CollisionSystem>().Update();
 }
 
 void Game::Render()
@@ -197,6 +206,11 @@ void Game::Render()
 	SDL_RenderClear(renderer);
 
 	registry->GetSystem<RenderSystem>().Update(renderer, assetStore);
+	
+	if (isDebug)
+	{
+		registry->GetSystem<RenderColliderSystem>().Update(renderer);
+	}
 
 	SDL_RenderPresent(renderer);
 }

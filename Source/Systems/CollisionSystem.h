@@ -4,9 +4,11 @@
 #include "../ECS/ECS.h"
 #include "../Components/BoxColliderComponent.h"
 #include "../Components/TransformComponent.h"
+#include "../Logger/Logger.h"
 
 class CollisionSystem : public System
 {
+public:
 	CollisionSystem()
 	{
 		RequireComponent<TransformComponent>();
@@ -15,35 +17,51 @@ class CollisionSystem : public System
 
 	void Update()
 	{
-		for (auto entity1 : GetSystemEntities())
+		auto entities = GetSystemEntities();
+
+		for (auto i = entities.begin(); i != entities.end(); i++)
 		{
-			auto transform1   = entity1.GetComponent<TransformComponent>();
-			auto boxCollider1 = entity1.GetComponent<BoxColliderComponent>();
+			Entity a = *i;
+			auto aTransform = a.GetComponent<TransformComponent>();
+			auto aCollider = a.GetComponent<BoxColliderComponent>();
 
-			float colliderOneSideHalfLengthX1 = boxCollider1.width / 2.0f;
-			float colliderOneSideHalfLengthY1 = boxCollider1.height / 2.0f;
-
-			float left1   = transform1.position.x - colliderOneSideHalfLengthX1 + boxCollider1.offset.x;
-			float right1  = transform1.position.x + colliderOneSideHalfLengthX1 + boxCollider1.offset.x;
-			float top1    = transform1.position.y + colliderOneSideHalfLengthY1 + boxCollider1.offset.y;
-			float bottom1 = transform1.position.y - colliderOneSideHalfLengthY1 + boxCollider1.offset.y;
-
-			for (auto entity2 : GetSystemEntities())
+			for (auto j = i; j != entities.end(); j++)
 			{
-				auto transform2   = entity2.GetComponent<TransformComponent>();
-				auto boxCollider2 = entity2.GetComponent<BoxColliderComponent>();
+				Entity b = *j;
 
-				float colliderOneSideHalfLengthX2 = boxCollider2.width / 2.0f;
-				float colliderOneSideHalfLengthY2 = boxCollider2.height / 2.0f;
+				if (a == b)
+				{
+					continue;
+				}
 
-				float left2   = transform2.position.x - colliderOneSideHalfLengthX2 + boxCollider2.offset.x;
-				float right2  = transform2.position.x + colliderOneSideHalfLengthX2 + boxCollider2.offset.x;
-				float top2    = transform2.position.y + colliderOneSideHalfLengthY2 + boxCollider2.offset.y;
-				float bottom2 = transform2.position.y - colliderOneSideHalfLengthY2 + boxCollider2.offset.y;
+				auto bTransform = b.GetComponent<TransformComponent>();
+				auto bCollider = b.GetComponent<BoxColliderComponent>();
 
-				// TODO::Check AABB Collision
+				bool collisionHappened = CheckAABBCollision(
+					aTransform.position.x + aCollider.offset.x,
+					aTransform.position.y + aCollider.offset.y,
+					aCollider.width,
+					aCollider.height,
+					bTransform.position.x + bCollider.offset.x,
+					bTransform.position.y + bCollider.offset.y,
+					bCollider.width,
+					bCollider.height
+				);
+
+				if (collisionHappened)
+				{
+					Logger::Log("Entity " + std::to_string(a.GetId()) + " is colliding with entity " + std::to_string(b.GetId()));
+				}
 			}
 		}
+	}
+
+	bool CheckAABBCollision(double aX, double aY, double aW, double aH, double bX, double bY, double bW, double bH)
+	{
+		return (aX < bX + bW &&
+				aX + aW > bX &&
+				aY < bY + bH &&
+				aY + aH > bY); 
 	}
 };
 
