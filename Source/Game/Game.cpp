@@ -14,12 +14,17 @@
 #include "../ECS/ECS.h"
 #include "../AssetStore/AssetStore.h"
 #include "../Services/AssetProvider.h"
+#include "../EventBus/EventBus.h"
+
+#include "../Events/KeyPressedEvent.h"
 
 #include "../Systems/MovementSystem.h"
 #include "../Systems/RenderSystem.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/CollisionSystem.h"
 #include "../Systems/RenderColliderSystem.h"
+#include "../Systems/DamageSystem.h"
+#include "../Systems/KeyboardControlSystem.h"
 
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidbodyComponent.h"
@@ -30,6 +35,8 @@ Game::Game() : isRunning(false), isDebug(false), millisecondsPreviousFrame(0)
 {
 	registry = std::make_unique<Registry>();
 	assetStore = std::make_unique<AssetStore>();
+	eventBus = std::make_unique<EventBus>();
+
 	Logger::Log("Game constructor called!");
 }
 
@@ -102,6 +109,8 @@ void Game::ProcessInput()
 			isRunning = false;
 			break;
 		case SDL_KEYDOWN:
+			eventBus->EmitEvent<KeyPressedEvent>(sdlEvent.key.keysym.sym);
+
 			if (sdlEvent.key.keysym.sym == SDLK_ESCAPE) 
 			{
 				isRunning = false;
@@ -122,6 +131,8 @@ void Game::LoadLevel(int level)
 	registry->AddSystem<AnimationSystem>();
 	registry->AddSystem<CollisionSystem>();
 	registry->AddSystem<RenderColliderSystem>();
+	registry->AddSystem<DamageSystem>();
+	registry->AddSystem<KeyboardControlSystem>();
 
 	assetStore->AddTexture(renderer, "tank-image", "Assets/Images/tank-panther-right.png");
 	assetStore->AddTexture(renderer, "truck-image", "Assets/Images/truck-ford-right.png");
@@ -193,11 +204,16 @@ void Game::Update()
 
 	millisecondsPreviousFrame = SDL_GetTicks();
 
+	eventBus->Reset();
+
+	registry->GetSystem<DamageSystem>().SubscribeToEvents(eventBus);
+	registry->GetSystem<KeyboardControlSystem>().SubscribeToEvents(eventBus);
+
 	registry->Update();
 
 	registry->GetSystem<MovementSystem>().Update(deltaTime);
 	registry->GetSystem<AnimationSystem>().Update();
-	registry->GetSystem<CollisionSystem>().Update();
+	registry->GetSystem<CollisionSystem>().Update(eventBus);
 }
 
 void Game::Render()
