@@ -3,14 +3,14 @@
 
 #include <glm/glm.hpp>
 
-struct KeboardControlComponent
+struct KeyboardControlComponent
 {
 	glm::vec2 upVelocity;
 	glm::vec2 rightVelocity;
 	glm::vec2 downVelocity;
 	glm::vec2 leftVelocity;
 
-	KeboardControlComponent(glm::vec2 upVelocity = glm::vec2(0, 0), glm::vec2 rightVelocity = glm::vec2(0, 0), glm::vec2 downVelocity = glm::vec2(0, 0), glm::vec2 leftVelocity = glm::vec2(0, 0))
+	KeyboardControlComponent(glm::vec2 upVelocity = glm::vec2(0, 0), glm::vec2 rightVelocity = glm::vec2(0, 0), glm::vec2 downVelocity = glm::vec2(0, 0), glm::vec2 leftVelocity = glm::vec2(0, 0))
 	{
 		this->upVelocity    = upVelocity;
 		this->rightVelocity = rightVelocity;
