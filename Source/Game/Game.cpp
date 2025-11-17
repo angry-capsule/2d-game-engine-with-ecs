@@ -30,6 +30,7 @@
 #include "../Components/RigidbodyComponent.h"
 #include "../Components/SpriteComponent.h"
 #include "../Components/AnimationComponent.h"
+#include "../Components/KeyboardControlComponent.h"
 
 Game::Game() : isRunning(false), isDebug(false), millisecondsPreviousFrame(0)
 {
@@ -136,7 +137,7 @@ void Game::LoadLevel(int level)
 
 	assetStore->AddTexture(renderer, "tank-image", "Assets/Images/tank-panther-right.png");
 	assetStore->AddTexture(renderer, "truck-image", "Assets/Images/truck-ford-right.png");
-	assetStore->AddTexture(renderer, "chopper-image", "Assets/Images/chopper.png");
+	assetStore->AddTexture(renderer, "chopper-image", "Assets/Images/chopper-spritesheet.png");
 	assetStore->AddTexture(renderer, "radar-image", "Assets/Images/radar.png");
 	assetStore->AddTexture(renderer, "tilemap-image", "Assets/Tilemaps/jungle.png");
 
@@ -172,6 +173,7 @@ void Game::LoadLevel(int level)
 	chopper.AddComponent<RigidbodyComponent>(glm::vec2(0.0, 0.0));
 	chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 1);
 	chopper.AddComponent<AnimationComponent>(2, 15, true);
+	chopper.AddComponent<KeyboardControlComponent>();
 
 	Entity radar = registry->CreateEntity();
 	radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
