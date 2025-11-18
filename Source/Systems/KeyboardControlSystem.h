@@ -16,8 +16,6 @@ class KeyboardControlSystem : public System
 private:
     void OnKeyPressed(KeyPressedEvent& event)
     {
-        Logger::Log("Key was pressed: " + std::string(SDL_GetKeyName(event.keyCode)));
-
         for (auto entity : GetSystemEntities())
         {
             const auto keyboardControl = entity.GetComponent<KeyboardControlComponent>();
