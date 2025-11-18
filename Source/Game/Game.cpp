@@ -27,6 +27,7 @@
 #include "../Systems/KeyboardControlSystem.h"
 #include "../Systems/CameraMovementSystem.h"
 #include "../Systems/ProjectileEmitSystem.h"
+#include "../Systems/ProjectileLifecycleSystem.h"
 
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidbodyComponent.h"
@@ -152,6 +153,7 @@ void Game::LoadLevel(int level)
     registry->AddSystem<KeyboardControlSystem>();
     registry->AddSystem<CameraMovementSystem>();
     registry->AddSystem<ProjectileEmitSystem>();
+    registry->AddSystem<ProjectileLifecycleSystem>();
 
     assetStore->AddTexture(renderer, "tank-image", "Assets/Images/tank-panther-right.png");
     assetStore->AddTexture(renderer, "truck-image", "Assets/Images/truck-ford-right.png");
@@ -210,7 +212,7 @@ void Game::LoadLevel(int level)
     tank.AddComponent<RigidbodyComponent>(glm::vec2(0.0, 0.0));
     tank.AddComponent<SpriteComponent>("tank-image", 32, 32, 1);
     tank.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0, 0));
-    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0f, 0.0f), 5000, 10000, 0, false);
+    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0f, 0.0f), 5000, 3000, 0, false);
     tank.AddComponent<HealthComponent>(100);
 
     Entity truck = registry->CreateEntity();
@@ -218,7 +220,7 @@ void Game::LoadLevel(int level)
     truck.AddComponent<RigidbodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<SpriteComponent>("truck-image", 32, 32, 2);
     truck.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0, 0));
-    truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0f, 100.0f), 2000, 10000, 0, false);
+    truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0f, 100.0f), 2000, 5000, 0, false);
     truck.AddComponent<HealthComponent>(100);
 }
 
@@ -246,6 +248,7 @@ void Game::Update()
     registry->GetSystem<CollisionSystem>().Update(eventBus);
     registry->GetSystem<CameraMovementSystem>().Update(camera);
     registry->GetSystem<ProjectileEmitSystem>().Update(registry);
+    registry->GetSystem<ProjectileLifecycleSystem>().Update();
 }
 
 void Game::Render()
