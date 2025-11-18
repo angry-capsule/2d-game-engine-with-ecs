@@ -26,6 +26,7 @@
 #include "../Systems/DamageSystem.h"
 #include "../Systems/KeyboardControlSystem.h"
 #include "../Systems/CameraMovementSystem.h"
+#include "../Systems/ProjectileEmitSystem.h"
 
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidbodyComponent.h"
@@ -33,6 +34,8 @@
 #include "../Components/AnimationComponent.h"
 #include "../Components/KeyboardControlComponent.h"
 #include "../Components/CameraFollowComponent.h"
+#include "../Components/ProjectileEmitterComponent.h"
+#include "../Components/HealthComponent.h"
 
 int Game::windowWidth;
 int Game::windowHeight;
@@ -148,12 +151,14 @@ void Game::LoadLevel(int level)
     registry->AddSystem<DamageSystem>();
     registry->AddSystem<KeyboardControlSystem>();
     registry->AddSystem<CameraMovementSystem>();
+    registry->AddSystem<ProjectileEmitSystem>();
 
     assetStore->AddTexture(renderer, "tank-image", "Assets/Images/tank-panther-right.png");
     assetStore->AddTexture(renderer, "truck-image", "Assets/Images/truck-ford-right.png");
     assetStore->AddTexture(renderer, "chopper-image", "Assets/Images/chopper-spritesheet.png");
     assetStore->AddTexture(renderer, "radar-image", "Assets/Images/radar.png");
     assetStore->AddTexture(renderer, "tilemap-image", "Assets/Tilemaps/jungle.png");
+    assetStore->AddTexture(renderer, "bullet-image", "Assets/Images/bullet.png");
 
     int tileSize = 32;
     double tileScale = 2.0;
@@ -190,9 +195,9 @@ void Game::LoadLevel(int level)
     chopper.AddComponent<RigidbodyComponent>(glm::vec2(0.0, 0.0));
     chopper.AddComponent<SpriteComponent>("chopper-image", 32, 32, 1);
     chopper.AddComponent<AnimationComponent>(2, 15, true);
-    chopper.AddComponent<KeyboardControlComponent>(glm::vec2(0.0f, -100.0f), glm::vec2(100.0f, 0.0f),
-                                                   glm::vec2(0.0f, 100.0f), glm::vec2(-100.0f, 0.0f));
+    chopper.AddComponent<KeyboardControlComponent>(glm::vec2(0.0f, -100.0f), glm::vec2(100.0f, 0.0f), glm::vec2(0.0f, 100.0f), glm::vec2(-100.0f, 0.0f));
     chopper.AddComponent<CameraFollowComponent>();
+    chopper.AddComponent<HealthComponent>(100);
 
     Entity radar = registry->CreateEntity();
     radar.AddComponent<TransformComponent>(glm::vec2(windowWidth - 74, 10.0), glm::vec2(1.0, 1.0), 0.0);
@@ -205,13 +210,16 @@ void Game::LoadLevel(int level)
     tank.AddComponent<RigidbodyComponent>(glm::vec2(0.0, 0.0));
     tank.AddComponent<SpriteComponent>("tank-image", 32, 32, 1);
     tank.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0, 0));
-    tank.AddComponent<ProjectileEmmiterComponent>();
+    tank.AddComponent<ProjectileEmitterComponent>(glm::vec2(100.0f, 0.0f), 5000, 10000, 0, false);
+    tank.AddComponent<HealthComponent>(100);
 
     Entity truck = registry->CreateEntity();
     truck.AddComponent<TransformComponent>(glm::vec2(10.0, 10.0), glm::vec2(1.0, 1.0), 0.0);
     truck.AddComponent<RigidbodyComponent>(glm::vec2(0.0, 0.0));
     truck.AddComponent<SpriteComponent>("truck-image", 32, 32, 2);
     truck.AddComponent<BoxColliderComponent>(32, 32, glm::vec2(0, 0));
+    truck.AddComponent<ProjectileEmitterComponent>(glm::vec2(0.0f, 100.0f), 2000, 10000, 0, false);
+    truck.AddComponent<HealthComponent>(100);
 }
 
 void Game::Update()
@@ -237,6 +245,7 @@ void Game::Update()
     registry->GetSystem<AnimationSystem>().Update();
     registry->GetSystem<CollisionSystem>().Update(eventBus);
     registry->GetSystem<CameraMovementSystem>().Update(camera);
+    registry->GetSystem<ProjectileEmitSystem>().Update(registry);
 }
 
 void Game::Render()
