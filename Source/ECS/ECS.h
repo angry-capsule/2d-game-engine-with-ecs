@@ -94,23 +94,28 @@ class Pool : public IPool
 {
 private:
 	std::vector<T> data;
+	int size;
+
+	std::unordered_map<int, int> entityIdToIndex;
+	std::unordered_map<int, int> indexToEntityId;
 
 public:
-	Pool(int size = 100)
+	Pool(int capacity = 100)
 	{
-		data.resize(size);
+		size = 0;
+		data.resize(capacity);
 	}
 
 	virtual ~Pool() = default;
 
 	bool IsEmpty() const
 	{
-		return data.empty();
+		return size == 0;
 	}
 
 	int GetSize() const
 	{
-		return data.size();
+		return size;
 	}
 
 	void Resize(int n)
@@ -121,6 +126,7 @@ public:
 	void Clear()
 	{
 		data.clear();
+		size = 0;
 	}
 
 	void Add(T object)
@@ -128,13 +134,47 @@ public:
 		data.push_back(object);
 	}
 
-	void Set(int index, T object)
+	void Set(int entityId, T object)
 	{
-		data[index] = object;
+		if (entityIdToIndex.find(entityId) != entityIdToIndex.end())
+		{
+			int index = entityIdToIndex[entityId];
+			data[index] = object;
+		}
+		else
+		{
+			int index = size;
+			entityIdToIndex.emplace(entityId, index);
+			indexToEntityId.emplace(index, entityId);
+
+			if (index >= data.capacity())
+			{
+				data.resize(size * 2);
+			}
+
+			data[index] = object;
+			size++;
+		}
 	}
 
-	T& Get(int index)
+	void Remove(int entityId)
 	{
+		int indexOfRemoved = entityIdToIndex[entityId];
+		int indexOfLast = size - 1;
+
+		int entityIdOfLastElement = indexToEntityId[indexOfLast];
+		entityIdToIndex[entityIdOfLastElement] = indexOfRemoved;
+		indexToEntityId[indexOfRemoved] = entityIdOfLastElement;
+
+		entityIdToIndex.erase(entityId);
+		indexToEntityId.erase(indexOfLast);
+
+		size--;
+	}
+
+	T& Get(int entityId)
+	{
+		int index = 
 		return static_cast<T&>(data[index]);
 	}
 
