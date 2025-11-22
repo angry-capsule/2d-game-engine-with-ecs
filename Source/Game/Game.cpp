@@ -28,6 +28,8 @@
 #include "../Systems/CameraMovementSystem.h"
 #include "../Systems/ProjectileEmitSystem.h"
 #include "../Systems/ProjectileLifecycleSystem.h"
+#include "../Systems/RenderTextSystem.h"
+#include "../Systems/RenderHealthBarSystem.h"
 
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidbodyComponent.h"
@@ -37,6 +39,7 @@
 #include "../Components/CameraFollowComponent.h"
 #include "../Components/ProjectileEmitterComponent.h"
 #include "../Components/HealthComponent.h"
+#include "../Components/TextLabelComponent.h"
 
 int Game::windowWidth;
 int Game::windowHeight;
@@ -64,6 +67,13 @@ void Game::Initialize()
         Logger::Err("Error initializing SDL.");
         return;
     }
+
+    if (TTF_Init() != 0)
+    {
+        Logger::Err("Error initializing SDL TTF.");
+        return;
+    }
+
     SDL_DisplayMode displayMode;
     SDL_GetCurrentDisplayMode(0, &displayMode);
     //windowWidth = displayMode.w;
@@ -154,6 +164,8 @@ void Game::LoadLevel(int level)
     registry->AddSystem<CameraMovementSystem>();
     registry->AddSystem<ProjectileEmitSystem>();
     registry->AddSystem<ProjectileLifecycleSystem>();
+    registry->AddSystem<RenderTextSystem>();
+    registry->AddSystem<RenderHealthBarSystem>();
 
     assetStore->AddTexture(renderer, "tank-image", "Assets/Images/tank-panther-right.png");
     assetStore->AddTexture(renderer, "truck-image", "Assets/Images/truck-ford-right.png");
@@ -161,6 +173,8 @@ void Game::LoadLevel(int level)
     assetStore->AddTexture(renderer, "radar-image", "Assets/Images/radar.png");
     assetStore->AddTexture(renderer, "tilemap-image", "Assets/Tilemaps/jungle.png");
     assetStore->AddTexture(renderer, "bullet-image", "Assets/Images/bullet.png");
+
+    assetStore->AddFont("charriot-font", "Assets/Fonts/charriot.ttf", 5);
 
     int tileSize = 32;
     double tileScale = 2.0;
@@ -264,6 +278,8 @@ void Game::Render()
     SDL_RenderClear(renderer);
 
     registry->GetSystem<RenderSystem>().Update(renderer, assetStore, camera);
+    registry->GetSystem<RenderTextSystem>().Update(renderer, assetStore, camera);
+    registry->GetSystem<RenderHealthBarSystem>().Update(renderer, assetStore, camera);
 
     if (isDebug)
     {

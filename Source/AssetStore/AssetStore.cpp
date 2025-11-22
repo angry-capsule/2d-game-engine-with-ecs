@@ -4,27 +4,33 @@
 #include <filesystem>
 #include "../Services/AssetProvider.h"
 
-AssetStore::AssetStore() 
+AssetStore::AssetStore()
 {
     Logger::Log("AssetStore constructor called!");
 }
 
-AssetStore::~AssetStore() 
+AssetStore::~AssetStore()
 {
     ClearAssets();
     Logger::Log("AssetStore destructor called!");
 }
 
-void AssetStore::ClearAssets() 
+void AssetStore::ClearAssets()
 {
-    for (auto texture: textures) 
+    for (auto texture : textures)
     {
         SDL_DestroyTexture(texture.second);
     }
     textures.clear();
+
+    for (auto font : fonts)
+    {
+        TTF_CloseFont(font.second);
+    }
+    fonts.clear();
 }
 
-void AssetStore::AddTexture(SDL_Renderer* renderer, const std::string& assetId, const std::string& filePath) 
+void AssetStore::AddTexture(SDL_Renderer* renderer, const std::string& assetId, const std::string& filePath)
 {
     const std::string assetPath = AssetProvider::GetAssetPath(filePath);
     SDL_Surface* surface = IMG_Load(assetPath.c_str());
@@ -36,7 +42,17 @@ void AssetStore::AddTexture(SDL_Renderer* renderer, const std::string& assetId, 
     Logger::Log("Texture added to the AssetStore with id " + assetId);
 }
 
-SDL_Texture* AssetStore::GetTexture(const std::string& assetId) 
+SDL_Texture* AssetStore::GetTexture(const std::string& assetId)
 {
     return textures[assetId];
+}
+
+void AssetStore::AddFont(const std::string& assetId, const std::string& filePath, int fontSize)
+{
+    fonts.emplace(assetId, TTF_OpenFont(AssetProvider::GetAssetPath(filePath).c_str(), fontSize));
+}
+
+TTF_Font* AssetStore::GetFont(const std::string& assetId)
+{
+    return fonts[assetId];
 }
