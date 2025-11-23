@@ -10,6 +10,9 @@
 #include "SDL_image.h"
 #include "SDL_ttf.h"
 
+#include "imgui.h"
+#include "imgui_sdl.h"
+
 #include "../Logger/Logger.h"
 #include "../ECS/ECS.h"
 #include "../AssetStore/AssetStore.h"
@@ -78,8 +81,8 @@ void Game::Initialize()
     SDL_GetCurrentDisplayMode(0, &displayMode);
     //windowWidth = displayMode.w;
     //windowHeight = displayMode.h;
-    windowWidth = 800;
-    windowHeight = 600;
+    windowWidth = 1920;
+    windowHeight = 1080;
     window = SDL_CreateWindow(
         NULL,
         SDL_WINDOWPOS_CENTERED,
@@ -100,6 +103,9 @@ void Game::Initialize()
         return;
     }
     // SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN);
+
+    ImGui::CreateContext();
+    ImGuiSDL::Initialize(renderer, windowWidth, windowHeight);
 
     camera.x = 0;
     camera.y = 0;
@@ -284,6 +290,11 @@ void Game::Render()
     if (isDebug)
     {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
+        
+        ImGui::NewFrame();
+        ImGui::ShowDemoWindow();
+        ImGui::Render();
+        ImGuiSDL::Render(ImGui::GetDrawData());
     }
 
     SDL_RenderPresent(renderer);
@@ -291,6 +302,8 @@ void Game::Render()
 
 void Game::Destroy()
 {
+    ImGuiSDL::Deinitialize();
+    ImGui::DestroyContext();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
