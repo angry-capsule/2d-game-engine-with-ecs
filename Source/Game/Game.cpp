@@ -34,6 +34,7 @@
 #include "../Systems/ProjectileLifecycleSystem.h"
 #include "../Systems/RenderTextSystem.h"
 #include "../Systems/RenderHealthBarSystem.h"
+#include "../Systems/RenderGUISystem.h"
 
 #include "../Components/TransformComponent.h"
 #include "../Components/RigidbodyComponent.h"
@@ -184,6 +185,7 @@ void Game::LoadLevel(int level)
     registry->AddSystem<ProjectileLifecycleSystem>();
     registry->AddSystem<RenderTextSystem>();
     registry->AddSystem<RenderHealthBarSystem>();
+    registry->AddSystem<RenderGUISystem>();
 
     assetStore->AddTexture(renderer, "tank-image", "Assets/Images/tank-panther-right.png");
     assetStore->AddTexture(renderer, "truck-image", "Assets/Images/truck-ford-right.png");
@@ -302,11 +304,7 @@ void Game::Render()
     if (isDebug)
     {
         registry->GetSystem<RenderColliderSystem>().Update(renderer, camera);
-        
-        ImGui::NewFrame();
-        ImGui::ShowDemoWindow();
-        ImGui::Render();
-        ImGuiSDL::Render(ImGui::GetDrawData());
+        registry->GetSystem<RenderGUISystem>().Update(registry, camera);
     }
 
     SDL_RenderPresent(renderer);
