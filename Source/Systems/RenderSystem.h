@@ -39,7 +39,7 @@ public:
                     renderableEntity.transformComponent.position.y + (renderableEntity.transformComponent.scale.y * renderableEntity.spriteComponent.height) < camera.y ||
                     renderableEntity.transformComponent.position.y > camera.y + camera.h;
 
-            if (isEntityOutsideCameraView)
+            if (isEntityOutsideCameraView && !renderableEntity.spriteComponent.isFixed)
             {
                 continue;
             }
