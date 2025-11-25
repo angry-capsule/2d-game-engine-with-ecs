@@ -71,6 +71,19 @@ public:
 			transform.position.x += rigidbody.velocity.x * deltaTime;
 			transform.position.y += rigidbody.velocity.y * deltaTime;
 
+			if (entity.HasTag("player"))
+			{
+				const int paddingLeft = 10;
+				const int paddingTop = 10;
+				const int paddingRight = 50;
+				const int paddingDown = 50;
+
+				transform.position.x = transform.position.x < paddingLeft ? paddingLeft : transform.position.x;
+				transform.position.x = transform.position.x > Game::mapWidth - paddingRight ? Game::mapWidth - paddingRight : transform.position.x;
+				transform.position.y = transform.position.y < paddingTop ? paddingTop : transform.position.y;
+				transform.position.y = transform.position.y > Game::mapHeight - paddingDown ? Game::mapHeight - paddingDown : transform.position.y;
+			}
+
 			bool isEntityOutsideMap = transform.position.x < 0
 										|| transform.position.x > Game::mapWidth
 										|| transform.position.y < 0
