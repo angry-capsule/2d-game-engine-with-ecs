@@ -60,7 +60,7 @@ public:
                 &dstRect,
                 transform.rotation,
                 NULL,
-                SDL_FLIP_NONE
+                sprite.flip
             );
         }
     }
