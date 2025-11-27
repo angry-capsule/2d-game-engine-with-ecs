@@ -6,13 +6,15 @@
 #include "SDL.h"
 #include <memory>
 
+#include "sol/sol.hpp"
+
 class LevelLoader
 {
 public:
     LevelLoader();
     ~LevelLoader();
 
-    void LoadLevel(std::unique_ptr<Registry>& registry, std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, int level);
+    void LoadLevel(sol::state& lua, std::unique_ptr<Registry>& registry, std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, int levelId);
 };
 
 

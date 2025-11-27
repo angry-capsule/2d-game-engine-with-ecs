@@ -33,20 +33,54 @@ LevelLoader::~LevelLoader()
 
 }
 
-void LevelLoader::LoadLevel(std::unique_ptr<Registry>& registry, std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, int level)
+void LevelLoader::LoadLevel(sol::state& lua, std::unique_ptr<Registry>& registry, std::unique_ptr<AssetStore>& assetStore, SDL_Renderer* renderer, int levelId)
 {
-    sol::state lua;
-    lua.open_libraries(sol::lib::base);
+    std::string pathToLevel = AssetProvider::GetAssetPath("Assets/Scripts/Level" + std::to_string(levelId) + ".lua");
 
-    assetStore->AddTexture(renderer, "tank-image", "Assets/Images/tank-panther-right.png");
-    assetStore->AddTexture(renderer, "truck-image", "Assets/Images/truck-ford-right.png");
-    assetStore->AddTexture(renderer, "chopper-image", "Assets/Images/chopper-spritesheet.png");
-    assetStore->AddTexture(renderer, "radar-image", "Assets/Images/radar.png");
-    assetStore->AddTexture(renderer, "tilemap-image", "Assets/Tilemaps/jungle.png");
-    assetStore->AddTexture(renderer, "bullet-image", "Assets/Images/bullet.png");
-    assetStore->AddTexture(renderer, "tree-image", "Assets/Images/tree.png");
+    sol::load_result scriptLoadingResult = lua.load_file(pathToLevel);
 
-    assetStore->AddFont("charriot-font", "Assets/Fonts/charriot.ttf", 5);
+    if (!scriptLoadingResult.valid())
+    {
+        sol::error err = scriptLoadingResult;
+        Logger::Err("Problem with loading script at path: " + pathToLevel + "\nWith error: " + err.what());
+        return;
+    }
+
+    lua.script_file(pathToLevel);
+
+    sol::table level = lua["Level"];
+
+    sol::table assets = level["assets"];
+
+    int i = 0;
+    while (true)
+    {
+        sol::optional<sol::table> hasAsset = assets[i];
+
+        if (hasAsset == sol::nullopt)
+        {
+            break;
+        }
+
+        sol::table asset = assets[i];
+
+        std::string assetType = asset["type"];
+        std::string assetId = asset["id"];
+        std::string assetPath = asset["file"];
+
+        if (assetType == "texture")
+        {
+            assetStore->AddTexture(renderer, assetId, assetPath);
+            Logger::Log("Texture added with id: " + assetId + " at path: " + assetPath);
+        }
+        if (assetType == "font")
+        {
+            assetStore->AddFont(assetId, assetPath, asset["font_size"]);
+            Logger::Log("Font added with id: " + assetId + " at path: " + assetPath);
+        }
+
+        i++;
+    }
 
     int tileSize = 32;
     double tileScale = 2.0;
